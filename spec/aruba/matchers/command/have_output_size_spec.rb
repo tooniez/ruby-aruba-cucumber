@@ -41,5 +41,15 @@ RSpec.describe 'Output Matchers' do
         expect(last_command_started).not_to have_output_size "#{output}\n".length + 1
       end
     end
+
+    context 'when size is zero' do
+      let(:cmd) { 'true' }
+
+      before { run_command(cmd) }
+
+      it 'matches directly on the command itself' do
+        expect(last_command_started).to have_output_size 0
+      end
+    end
   end
 end

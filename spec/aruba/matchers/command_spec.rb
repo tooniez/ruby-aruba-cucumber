@@ -80,6 +80,18 @@ RSpec.describe 'Command Matchers' do
 
       it { expect(last_command_started).not_to have_output 'hello universe' }
     end
+
+    context 'when has empty output' do
+      before { run_command('false') }
+
+      it { expect(last_command_started).to have_output '' }
+    end
+
+    context 'when not has empty output' do
+      before { run_command(cmd) }
+
+      it { expect(last_command_started).not_to have_output '' }
+    end
   end
 
   describe '#to_have_output_on_stdout' do
