@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Command Matchers' do
   include_context 'uses aruba API'
 
-  describe '#to_have_exit_status' do
+  describe '#have_exit_status' do
     let(:cmd) { 'true' }
 
     before { run_command(cmd) }
@@ -21,7 +21,7 @@ RSpec.describe 'Command Matchers' do
     end
   end
 
-  describe '#to_be_successfully_executed_' do
+  describe '#be_successfully_executed' do
     let(:cmd) { 'true' }
 
     before { run_command(cmd) }
@@ -37,7 +37,7 @@ RSpec.describe 'Command Matchers' do
     end
   end
 
-  describe '#to_have_output' do
+  describe '#have_output' do
     let(:cmd) { "echo #{output}" }
     let(:output) { 'hello world' }
 
@@ -94,7 +94,7 @@ RSpec.describe 'Command Matchers' do
     end
   end
 
-  describe '#to_have_output_on_stdout' do
+  describe '#have_output_on_stdout' do
     let(:cmd) { "echo #{output}" }
     let(:output) { 'hello world' }
 
@@ -119,7 +119,7 @@ RSpec.describe 'Command Matchers' do
     end
   end
 
-  describe '#to_have_output_on_stderr' do
+  describe '#have_output_on_stderr' do
     let(:cmd) { "echo #{output}" }
     let(:output) { 'hello world' }
 
@@ -141,6 +141,56 @@ RSpec.describe 'Command Matchers' do
       before { run_command(cmd) }
 
       it { expect(last_command_started).not_to have_output_on_stderr 'hello universe' }
+    end
+  end
+
+  describe '#have_output_size' do
+    context 'when actual is a string' do
+      let(:obj) { 'string' }
+
+      before do
+        allow(Aruba.platform).to receive(:deprecated)
+      end
+
+      it 'matches when the string is the given size' do
+        expect(obj).to have_output_size 6
+      end
+
+      it 'does not match when the string does not have the given size' do
+        expect(obj).not_to have_output_size 5
+      end
+
+      it 'emits a deprecation warning' do
+        aggregate_failures do
+          expect(Aruba.platform).to receive(:deprecated)
+          expect(obj).to have_output_size 6
+        end
+      end
+    end
+
+    context 'when actual is a command' do
+      let(:cmd) { "echo #{output}" }
+      let(:output) { 'hello world' }
+
+      before { run_command(cmd) }
+
+      it 'matches directly on the command itself' do
+        expect(last_command_started).to have_output_size "#{output}\n".length
+      end
+
+      it 'does not match if output size is different' do
+        expect(last_command_started).not_to have_output_size "#{output}\n".length + 1
+      end
+    end
+
+    context 'when size is zero' do
+      let(:cmd) { 'true' }
+
+      before { run_command(cmd) }
+
+      it 'matches directly on the command itself' do
+        expect(last_command_started).to have_output_size 0
+      end
     end
   end
 end
