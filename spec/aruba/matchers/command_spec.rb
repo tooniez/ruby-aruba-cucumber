@@ -37,6 +37,44 @@ RSpec.describe 'Command Matchers' do
     end
   end
 
+  describe '#have_finished_in_time' do
+    let(:slow_cmd) { 'sleep 0.2' }
+    let(:fast_cmd) { 'true' }
+
+    before { aruba.config.exit_timeout = 0.1 }
+
+    it 'matches for a fast command' do
+      run_command(fast_cmd)
+
+      expect(last_command_started).to have_finished_in_time
+    end
+
+    it 'matches negatively for a slow command' do
+      run_command(slow_cmd)
+
+      expect(last_command_started).not_to have_finished_in_time
+    end
+  end
+
+  describe '#run_too_long' do
+    let(:slow_cmd) { 'sleep 0.2' }
+    let(:fast_cmd) { 'true' }
+
+    before { aruba.config.exit_timeout = 0.1 }
+
+    it 'matches negatively for a fast command' do
+      run_command(fast_cmd)
+
+      expect(last_command_started).not_to run_too_long
+    end
+
+    it 'matches for a slow command' do
+      run_command(slow_cmd)
+
+      expect(last_command_started).to run_too_long
+    end
+  end
+
   describe '#have_output' do
     let(:cmd) { "echo #{output}" }
     let(:output) { 'hello world' }
